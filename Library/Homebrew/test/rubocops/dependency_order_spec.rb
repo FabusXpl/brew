@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/dependency_order"
 
-describe RuboCop::Cop::FormulaAudit::DependencyOrder do
+RSpec.describe RuboCop::Cop::FormulaAudit::DependencyOrder do
   subject(:cop) { described_class.new }
 
   context "when auditing `uses_from_macos`" do

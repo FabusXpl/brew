@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/deprecate_disable"
 
-describe RuboCop::Cop::FormulaAudit::DeprecateDisableDate do
+RSpec.describe RuboCop::Cop::FormulaAudit::DeprecateDisableDate do
   subject(:cop) { described_class.new }
 
   context "when auditing `deprecate!`" do

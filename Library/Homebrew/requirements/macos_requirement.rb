@@ -1,37 +1,35 @@
-# typed: true
+# typed: true # rubocop:todo Sorbet/StrictSigil
 # frozen_string_literal: true
 
 require "requirement"
 
 # A requirement on macOS.
-#
-# @api private
 class MacOSRequirement < Requirement
-  extend T::Sig
-
   fatal true
 
   attr_reader :comparator, :version
 
   # TODO: when Yosemite is removed here, keep these around as empty arrays so we
   # can keep the deprecation/disabling code the same.
-  DISABLED_MACOS_VERSIONS = [].freeze
-  DEPRECATED_MACOS_VERSIONS = [
+  DISABLED_MACOS_VERSIONS = [
     :yosemite,
   ].freeze
+  DEPRECATED_MACOS_VERSIONS = [].freeze
 
   def initialize(tags = [], comparator: ">=")
     @version = begin
       if comparator == "==" && tags.first.respond_to?(:map)
-        tags.first.map { |s| OS::Mac::Version.from_symbol(s) }
+        tags.first.map { |s| MacOSVersion.from_symbol(s) }
       else
-        OS::Mac::Version.from_symbol(tags.first) unless tags.empty?
+        MacOSVersion.from_symbol(tags.first) unless tags.empty?
       end
-    rescue MacOSVersionError => e
+    rescue MacOSVersion::Error => e
       if DISABLED_MACOS_VERSIONS.include?(e.version)
-        odisabled "depends_on :macos => :#{e.version}"
+        # This odisabled should stick around indefinitely.
+        odisabled "`depends_on macos: :#{e.version}`"
       elsif DEPRECATED_MACOS_VERSIONS.include?(e.version)
-        odeprecated "depends_on :macos => :#{e.version}"
+        # This odeprecated should stick around indefinitely.
+        odeprecated "`depends_on macos: :#{e.version}`"
       else
         raise
       end
@@ -43,7 +41,7 @@ class MacOSRequirement < Requirement
       end
 
       # Otherwise fallback to the oldest allowed if comparator is >=.
-      OS::Mac::Version.new(HOMEBREW_MACOS_OLDEST_ALLOWED) if comparator == ">="
+      MacOSVersion.new(HOMEBREW_MACOS_OLDEST_ALLOWED) if comparator == ">="
     end
 
     @comparator = comparator
@@ -61,6 +59,26 @@ class MacOSRequirement < Requirement
     next true if @version
 
     false
+  end
+
+  def minimum_version
+    return MacOSVersion.new(HOMEBREW_MACOS_OLDEST_ALLOWED) if @comparator == "<=" || !version_specified?
+    return @version.min if @version.respond_to?(:to_ary)
+
+    @version
+  end
+
+  def allows?(other)
+    return true unless version_specified?
+
+    case @comparator
+    when ">=" then other >= @version
+    when "<=" then other <= @version
+    else
+      return @version.include?(other) if @version.respond_to?(:to_ary)
+
+      @version == other
+    end
   end
 
   def message(type: :formula)
@@ -90,7 +108,7 @@ class MacOSRequirement < Requirement
   end
 
   def ==(other)
-    super(other) && comparator == other.comparator && version == other.version
+    super && comparator == other.comparator && version == other.version
   end
   alias eql? ==
 

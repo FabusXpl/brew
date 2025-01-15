@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/io_read"
 
-describe RuboCop::Cop::Homebrew::IORead do
+RSpec.describe RuboCop::Cop::Homebrew::IORead do
   subject(:cop) { described_class.new }
 
   it "reports an offense when `IO.read` is used with a pipe character" do

@@ -1,12 +1,11 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/lines"
 
-describe RuboCop::Cop::FormulaAuditStrict::MakeCheck do
+RSpec.describe RuboCop::Cop::FormulaAuditStrict::MakeCheck do
   subject(:cop) { described_class.new }
 
-  let(:path) { Tap::TAP_DIRECTORY/"homebrew/homebrew-core" }
+  let(:path) { HOMEBREW_TAP_DIRECTORY/"homebrew/homebrew-core" }
 
   before do
     path.mkpath

@@ -12,14 +12,22 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
 jobs:
   spdx:
     if: github.repository == 'Homebrew/brew'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+        with:
+          core: false
+          cask: false
+          test-bot: false
 
       - name: Configure Git user
         uses: Homebrew/actions/git-user-config@master
@@ -75,7 +83,7 @@ jobs:
 
       - name: Open a pull request
         if: steps.update.outputs.pull_request == 'true'
-        run: hub pull-request --no-edit
+        run: gh pr create --fill
         env:
           GITHUB_TOKEN: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}

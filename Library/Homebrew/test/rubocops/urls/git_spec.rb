@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/urls"
 
-describe RuboCop::Cop::FormulaAudit::GitUrls do
+RSpec.describe RuboCop::Cop::FormulaAudit::GitUrls do
   subject(:cop) { described_class.new }
 
   context "when a git URL is used" do

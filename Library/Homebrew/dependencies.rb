@@ -1,14 +1,10 @@
-# typed: true
+# typed: true # rubocop:todo Sorbet/StrictSigil
 # frozen_string_literal: true
 
 require "delegate"
 
 # A collection of dependencies.
-#
-# @api private
 class Dependencies < SimpleDelegator
-  extend T::Sig
-
   def initialize(*args)
     super(args)
   end
@@ -35,18 +31,23 @@ class Dependencies < SimpleDelegator
     build + required + recommended
   end
 
+  def dup_without_system_deps
+    self.class.new(*__getobj__.reject { |dep| dep.uses_from_macos? && dep.use_macos_install? })
+  end
+
   sig { returns(String) }
   def inspect
     "#<#{self.class.name}: #{__getobj__}>"
   end
+
+  sig { returns(T::Array[Dependency]) }
+  def to_a
+    __getobj__.to_a
+  end
 end
 
 # A collection of requirements.
-#
-# @api private
 class Requirements < SimpleDelegator
-  extend T::Sig
-
   def initialize(*args)
     super(Set.new(args))
   end
@@ -59,6 +60,8 @@ class Requirements < SimpleDelegator
         __getobj__.delete(req)
       end
     end
+    # see https://sorbet.org/docs/faq#how-can-i-fix-type-errors-that-arise-from-super
+    T.bind(self, T.untyped)
     super
     self
   end

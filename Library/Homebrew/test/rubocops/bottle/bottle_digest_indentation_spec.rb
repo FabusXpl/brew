@@ -1,12 +1,11 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/bottle"
 
-describe RuboCop::Cop::FormulaAudit::BottleDigestIndentation do
+RSpec.describe RuboCop::Cop::FormulaAudit::BottleDigestIndentation do
   subject(:cop) { described_class.new }
 
-  it "reports no offenses for `bottle :uneeded`" do
+  it "reports no offenses for `bottle :unneeded`" do
     expect_no_offenses(<<~RUBY)
       class Foo < Formula
         url "https://brew.sh/foo-1.0.tgz"

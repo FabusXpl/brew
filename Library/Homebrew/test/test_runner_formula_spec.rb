@@ -1,10 +1,9 @@
-# typed: false
 # frozen_string_literal: true
 
 require "test_runner_formula"
 require "test/support/fixtures/testball"
 
-describe TestRunnerFormula do
+RSpec.describe TestRunnerFormula do
   let(:testball) { Testball.new }
   let(:xcode_helper) { setup_test_formula("xcode-helper", [:macos]) }
   let(:linux_kernel_requirer) { setup_test_formula("linux-kernel-requirer", [:linux]) }
@@ -144,7 +143,7 @@ describe TestRunnerFormula do
       end
     end
 
-    context "when a formula does not require a specfic architecture" do
+    context "when a formula does not require a specific architecture" do
       it "returns false" do
         expect(described_class.new(testball).x86_64_only?).to be(false)
         expect(described_class.new(xcode_helper).x86_64_only?).to be(false)
@@ -241,14 +240,14 @@ describe TestRunnerFormula do
     context "when a formula has a versioned MacOSRequirement" do
       context "when passed a compatible macOS version" do
         it "returns true" do
-          expect(described_class.new(needs_modern_compiler).compatible_with?(OS::Mac::Version.new("13")))
+          expect(described_class.new(needs_modern_compiler).compatible_with?(MacOSVersion.new("13")))
             .to be(true)
         end
       end
 
       context "when passed an incompatible macOS version" do
         it "returns false" do
-          expect(described_class.new(needs_modern_compiler).compatible_with?(OS::Mac::Version.new("11")))
+          expect(described_class.new(needs_modern_compiler).compatible_with?(MacOSVersion.new("11")))
             .to be(false)
         end
       end
@@ -256,8 +255,8 @@ describe TestRunnerFormula do
 
     context "when a formula has an unversioned MacOSRequirement" do
       it "returns true" do
-        MacOSVersions::SYMBOLS.each_value do |v|
-          version = OS::Mac::Version.new(v)
+        MacOSVersion::SYMBOLS.each_value do |v|
+          version = MacOSVersion.new(v)
           expect(described_class.new(xcode_helper).compatible_with?(version)).to be(true)
         end
       end
@@ -265,8 +264,8 @@ describe TestRunnerFormula do
 
     context "when a formula has no declared MacOSRequirement" do
       it "returns true" do
-        MacOSVersions::SYMBOLS.each_value do |v|
-          version = OS::Mac::Version.new(v)
+        MacOSVersion::SYMBOLS.each_value do |v|
+          version = MacOSVersion.new(v)
           expect(described_class.new(testball).compatible_with?(version)).to be(true)
           expect(described_class.new(linux_kernel_requirer).compatible_with?(version)).to be(true)
           expect(described_class.new(old_non_portable_software).compatible_with?(version)).to be(true)
@@ -297,15 +296,12 @@ describe TestRunnerFormula do
 
     context "when a formula has no dependents" do
       it "returns an empty array" do
-        expect(described_class.new(testball).dependents(current_system)).to eq([])
-        expect(described_class.new(xcode_helper).dependents(current_system)).to eq([])
-        expect(described_class.new(linux_kernel_requirer).dependents(current_system)).to eq([])
-        expect(described_class.new(old_non_portable_software).dependents(current_system)).to eq([])
-        expect(described_class.new(fancy_new_software).dependents(current_system)).to eq([])
-        expect(described_class.new(needs_modern_compiler).dependents(current_system)).to eq([])
-
-        expect(Homebrew::SimulateSystem.os).to be_nil
-        expect(Homebrew::SimulateSystem.arch).to be_nil
+        expect(described_class.new(testball).dependents(**current_system)).to eq([])
+        expect(described_class.new(xcode_helper).dependents(**current_system)).to eq([])
+        expect(described_class.new(linux_kernel_requirer).dependents(**current_system)).to eq([])
+        expect(described_class.new(old_non_portable_software).dependents(**current_system)).to eq([])
+        expect(described_class.new(fancy_new_software).dependents(**current_system)).to eq([])
+        expect(described_class.new(needs_modern_compiler).dependents(**current_system)).to eq([])
       end
     end
 
@@ -317,15 +313,12 @@ describe TestRunnerFormula do
         allow(Formula).to receive(:all).and_return([testball_user, recursive_testball_dependent])
 
         expect(
-          described_class.new(testball, eval_all: true).dependents(current_system).map(&:name),
+          described_class.new(testball, eval_all: true).dependents(**current_system).map(&:name),
         ).to eq(["testball_user"])
 
         expect(
-          described_class.new(testball_user, eval_all: true).dependents(current_system).map(&:name),
+          described_class.new(testball_user, eval_all: true).dependents(**current_system).map(&:name),
         ).to eq(["recursive_testball_dependent"])
-
-        expect(Homebrew::SimulateSystem.os).to be_nil
-        expect(Homebrew::SimulateSystem.arch).to be_nil
       end
 
       context "when called with arguments" do
@@ -348,102 +341,62 @@ describe TestRunnerFormula do
         end
 
         context "when given { platform: :linux, arch: :x86_64 }" do
-          before do
-            Homebrew::SimulateSystem.os = :linux
-            Homebrew::SimulateSystem.arch = :intel
-          end
-
           it "returns only the dependents for the requested platform and architecture" do
-            allow(Formula).to receive(:all).and_return(testball_and_dependents)
+            allow(Formula).to receive(:all).and_wrap_original { testball_and_dependents }
 
             expect(
               described_class.new(testball, eval_all: true).dependents(
                 platform: :linux, arch: :x86_64, macos_version: nil,
               ).map(&:name).sort,
             ).to eq(["testball_user", "testball_user-intel", "testball_user-linux"].sort)
-
-            expect(Homebrew::SimulateSystem.os).to be_nil
-            expect(Homebrew::SimulateSystem.arch).to be_nil
           end
         end
 
         context "when given { platform: :macos, arch: :x86_64 }" do
-          before do
-            Homebrew::SimulateSystem.os = :macos
-            Homebrew::SimulateSystem.arch = :intel
-          end
-
           it "returns only the dependents for the requested platform and architecture" do
-            allow(Formula).to receive(:all).and_return(testball_and_dependents)
+            allow(Formula).to receive(:all).and_wrap_original { testball_and_dependents }
 
             expect(
               described_class.new(testball, eval_all: true).dependents(
                 platform: :macos, arch: :x86_64, macos_version: nil,
               ).map(&:name).sort,
             ).to eq(["testball_user", "testball_user-intel", "testball_user-macos"].sort)
-
-            expect(Homebrew::SimulateSystem.os).to be_nil
-            expect(Homebrew::SimulateSystem.arch).to be_nil
           end
         end
 
         context "when given `{ platform: :macos, arch: :arm64 }`" do
-          before do
-            Homebrew::SimulateSystem.os = :macos
-            Homebrew::SimulateSystem.arch = :arm
-          end
-
           it "returns only the dependents for the requested platform and architecture" do
-            allow(Formula).to receive(:all).and_return(testball_and_dependents)
+            allow(Formula).to receive(:all).and_wrap_original { testball_and_dependents }
 
             expect(
               described_class.new(testball, eval_all: true).dependents(
                 platform: :macos, arch: :arm64, macos_version: nil,
               ).map(&:name).sort,
             ).to eq(["testball_user", "testball_user-arm", "testball_user-macos"].sort)
-
-            expect(Homebrew::SimulateSystem.os).to be_nil
-            expect(Homebrew::SimulateSystem.arch).to be_nil
           end
         end
 
         context "when given `{ platform: :macos, arch: :x86_64, macos_version: :mojave }`" do
-          before do
-            Homebrew::SimulateSystem.os = :mojave
-            Homebrew::SimulateSystem.arch = :intel
-          end
-
           it "returns only the dependents for the requested platform and architecture" do
-            allow(Formula).to receive(:all).and_return(testball_and_dependents)
+            allow(Formula).to receive(:all).and_wrap_original { testball_and_dependents }
 
             expect(
               described_class.new(testball, eval_all: true).dependents(
                 platform: :macos, arch: :x86_64, macos_version: :mojave,
               ).map(&:name).sort,
             ).to eq(["testball_user", "testball_user-intel", "testball_user-macos"].sort)
-
-            expect(Homebrew::SimulateSystem.os).to be_nil
-            expect(Homebrew::SimulateSystem.arch).to be_nil
           end
         end
 
         context "when given `{ platform: :macos, arch: :arm64, macos_version: :ventura }`" do
-          before do
-            Homebrew::SimulateSystem.os = :ventura
-            Homebrew::SimulateSystem.arch = :arm
-          end
-
           it "returns only the dependents for the requested platform and architecture" do
-            allow(Formula).to receive(:all).and_return(testball_and_dependents)
+            allow(Formula).to receive(:all).and_wrap_original { testball_and_dependents }
 
             expect(
               described_class.new(testball, eval_all: true).dependents(
                 platform: :macos, arch: :arm64, macos_version: :ventura,
               ).map(&:name).sort,
             ).to eq(%w[testball_user testball_user-arm testball_user-macos testball_user-ventura].sort)
-
-            expect(Homebrew::SimulateSystem.os).to be_nil
-            expect(Homebrew::SimulateSystem.arch).to be_nil
           end
         end
       end

@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/lines"
 
-describe RuboCop::Cop::FormulaAudit::SafePopenCommands do
+RSpec.describe RuboCop::Cop::FormulaAudit::SafePopenCommands do
   subject(:cop) { described_class.new }
 
   context "when auditing popen commands" do

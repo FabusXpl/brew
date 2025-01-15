@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/lines"
 
-describe RuboCop::Cop::FormulaAudit::OnSystemConditionals do
+RSpec.describe RuboCop::Cop::FormulaAudit::OnSystemConditionals do
   subject(:cop) { described_class.new }
 
   context "when auditing OS conditionals" do

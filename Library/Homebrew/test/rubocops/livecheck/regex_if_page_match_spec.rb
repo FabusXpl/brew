@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/livecheck"
 
-describe RuboCop::Cop::FormulaAudit::LivecheckRegexIfPageMatch do
+RSpec.describe RuboCop::Cop::FormulaAudit::LivecheckRegexIfPageMatch do
   subject(:cop) { described_class.new }
 
   it "reports an offense when there is no `regex` for `strategy :page_match`" do

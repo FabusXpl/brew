@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "linux_runner_spec"
 
-describe LinuxRunnerSpec do
+RSpec.describe LinuxRunnerSpec do
   let(:spec) do
     described_class.new(
       name:      "Linux",
@@ -17,7 +16,7 @@ describe LinuxRunnerSpec do
 
   it "has immutable attributes" do
     [:name, :runner, :container, :workdir, :timeout, :cleanup].each do |attribute|
-      expect(spec.respond_to?("#{attribute}=")).to be(false)
+      expect(spec.respond_to?(:"#{attribute}=")).to be(false)
     end
   end
 

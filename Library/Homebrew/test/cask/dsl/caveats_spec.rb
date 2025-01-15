@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "test/cask/dsl/shared_examples/base"
 
-describe Cask::DSL::Caveats, :cask do
+RSpec.describe Cask::DSL::Caveats, :cask do
   subject(:caveats) { described_class.new(cask) }
 
   let(:cask) { Cask::CaskLoader.load(cask_path("basic-cask")) }
@@ -17,7 +16,7 @@ describe Cask::DSL::Caveats, :cask do
     let(:cask) { instance_double(Cask::Cask) }
 
     it "points to System Preferences on macOS Monterey and earlier" do
-      allow(MacOS).to receive(:version).and_return(MacOS::Version.new("12"))
+      allow(MacOS).to receive(:version).and_return(MacOSVersion.new("12"))
       caveats.eval_caveats do
         kext
       end
@@ -25,7 +24,7 @@ describe Cask::DSL::Caveats, :cask do
     end
 
     it "points to System Settings on macOS Ventura and later" do
-      allow(MacOS).to receive(:version).and_return(MacOS::Version.new("13"))
+      allow(MacOS).to receive(:version).and_return(MacOSVersion.new("13"))
       caveats.eval_caveats do
         kext
       end

@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/uses_from_macos"
 
-describe RuboCop::Cop::FormulaAudit::ProvidedByMacos do
+RSpec.describe RuboCop::Cop::FormulaAudit::ProvidedByMacos do
   subject(:cop) { described_class.new }
 
   it "fails for formulae not in PROVIDED_BY_MACOS_FORMULAE list" do

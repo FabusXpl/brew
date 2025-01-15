@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/options"
 
-describe RuboCop::Cop::FormulaAudit::Options do
+RSpec.describe RuboCop::Cop::FormulaAudit::Options do
   subject(:cop) { described_class.new }
 
   context "when auditing options" do

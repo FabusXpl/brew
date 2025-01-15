@@ -1,10 +1,9 @@
-# typed: false
 # frozen_string_literal: true
 
 require "cask/installer"
 require "cask/reinstall"
 
-describe Cask::Reinstall, :cask do
+RSpec.describe Cask::Reinstall, :cask do
   it "displays the reinstallation progress" do
     caffeine = Cask::CaskLoader.load(cask_path("local-caffeine"))
 
@@ -53,7 +52,7 @@ describe Cask::Reinstall, :cask do
   end
 
   it "allows reinstalling a Cask" do
-    Cask::Cmd::Install.run("local-transmission")
+    Cask::Installer.new(Cask::CaskLoader.load(cask_path("local-transmission"))).install
 
     expect(Cask::CaskLoader.load(cask_path("local-transmission"))).to be_installed
 

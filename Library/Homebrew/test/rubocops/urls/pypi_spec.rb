@@ -1,9 +1,8 @@
-# typed: false
 # frozen_string_literal: true
 
 require "rubocops/urls"
 
-describe RuboCop::Cop::FormulaAudit::PyPiUrls do
+RSpec.describe RuboCop::Cop::FormulaAudit::PyPiUrls do
   subject(:cop) { described_class.new }
 
   context "when a pypi URL is used" do

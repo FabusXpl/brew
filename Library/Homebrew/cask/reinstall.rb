@@ -1,9 +1,7 @@
-# typed: true
+# typed: true # rubocop:todo Sorbet/StrictSigil
 # frozen_string_literal: true
 
 module Cask
-  #
-  # @api private
   class Reinstall
     def self.reinstall_casks(
       *casks,
@@ -21,13 +19,14 @@ module Cask
 
       casks.each do |cask|
         Installer.new(cask,
-                      binaries:       binaries,
-                      verbose:        verbose,
-                      force:          force,
-                      skip_cask_deps: skip_cask_deps,
-                      require_sha:    require_sha,
-                      quarantine:     quarantine,
-                      zap:            zap).reinstall
+                      binaries:,
+                      verbose:,
+                      force:,
+                      skip_cask_deps:,
+                      require_sha:,
+                      reinstall:      true,
+                      quarantine:,
+                      zap:).install
       end
     end
   end
